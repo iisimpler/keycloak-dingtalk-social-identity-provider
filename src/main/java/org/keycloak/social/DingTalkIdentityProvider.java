@@ -57,18 +57,21 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider imp
     protected BrokeredIdentityContext extractIdentityFromProfile(EventBuilder event, JsonNode profile) {
         logger.info("extractIdentityFromProfile=" + profile.toString());
 
-        BrokeredIdentityContext user = new BrokeredIdentityContext((getJsonProperty(profile, "unionId")));
+        BrokeredIdentityContext user = new BrokeredIdentityContext(getJsonProperty(profile, "unionId"), getConfig());
 
+        String nick = getJsonProperty(profile, "nick");
         String email = getJsonProperty(profile, "email");
-        user.setUsername(email.split("@")[0]);
-        user.setEmail(email);
+        String username = email.split("@")[0];
+        user.setUsername(username);
+        user.setEmail(getJsonProperty(profile, "email"));
+        user.setFirstName(nick);
+        user.setLastName(username);
         user.setUserAttribute("mobile", getJsonProperty(profile, "mobile"));
         user.setUserAttribute("avatarUrl", getJsonProperty(profile, "avatarUrl"));
-        user.setUserAttribute("nick", getJsonProperty(profile, "nick"));
+        user.setUserAttribute("nick", nick);
         user.setUserAttribute("stateCode", getJsonProperty(profile, "stateCode"));
         user.setUserAttribute("unionId", getJsonProperty(profile, "unionId"));
         user.setUserAttribute("openId", getJsonProperty(profile, "openId"));
-        user.setIdpConfig(getConfig());
         user.setIdp(this);
 
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
